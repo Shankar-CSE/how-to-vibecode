@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import Team from './pages/Team';
@@ -7,13 +9,11 @@ import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 
-const Sidebar = () => {
-    const user = {
-        name: "Shankar CSE",
-        role: "Project Manager",
-    };
+import { useAuth } from './context/AuthContext';
 
-    const initial = user.name ? user.name.charAt(0).toUpperCase() : '?';
+const Sidebar = () => {
+    const { user, logout } = useAuth();
+    const initial = user?.name ? user.name.charAt(0).toUpperCase() : '?';
 
     return (
         <aside className="w-80 h-screen bg-[#020617] border-r border-slate-800 flex flex-col p-8 transition-all duration-300">
@@ -32,22 +32,27 @@ const Sidebar = () => {
             </nav>
 
             <div className="mt-auto pt-6 border-t border-slate-800/80">
-                <div className="flex items-center gap-4 p-2 transition-all duration-300 hover:bg-slate-900/50 rounded-2xl cursor-pointer group">
+                <div 
+                    onClick={logout}
+                    title="Click to Logout"
+                    className="flex items-center gap-4 p-2 transition-all duration-300 hover:bg-red-500/10 rounded-2xl cursor-pointer group"
+                >
                     <div className="relative">
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xl font-extrabold shadow-xl group-hover:scale-105 transition-transform">
                             {initial}
                         </div>
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-[#020617] rounded-full"></div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-[#020617] rounded-full group-hover:bg-red-500 group-hover:border-red-500/20 transition-colors"></div>
                     </div>
                     <div className="flex flex-col min-w-0">
-                        <span className="text-slate-100 font-semibold truncate text-[15px]">{user.name}</span>
-                        <span className="text-slate-500 text-xs font-bold uppercase tracking-widest truncate">{user.role}</span>
+                        <span className="text-slate-100 font-semibold truncate text-[15px] group-hover:text-red-400 transition-colors">{user?.name || 'User'}</span>
+                        <span className="text-slate-500 text-xs font-bold uppercase tracking-widest truncate">Click to Logout</span>
                     </div>
                 </div>
             </div>
         </aside>
     );
 };
+
 
 const NavItem = ({ to, icon, label }) => (
     <NavLink 
@@ -98,16 +103,46 @@ const Layout = ({ children }) => (
 
 function App() {
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/" element={<Layout><Dashboard /></Layout>} />
-                <Route path="/projects" element={<Layout><Projects /></Layout>} />
-                <Route path="/team" element={<Layout><Team /></Layout>} />
-                <Route path="/profile" element={<Layout><Profile /></Layout>} />
-            </Routes>
-        </BrowserRouter>
+        <AuthProvider>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route 
+                        path="/" 
+                        element={
+                            <ProtectedRoute>
+                                <Layout><Dashboard /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/projects" 
+                        element={
+                            <ProtectedRoute>
+                                <Layout><Projects /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/team" 
+                        element={
+                            <ProtectedRoute>
+                                <Layout><Team /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/profile" 
+                        element={
+                            <ProtectedRoute>
+                                <Layout><Profile /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                </Routes>
+            </BrowserRouter>
+        </AuthProvider>
     );
 }
 
