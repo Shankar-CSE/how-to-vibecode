@@ -1,2 +1,5 @@
 # how-to-vibecode
-my college conducting a full-day session for vibe-coding
+
+ This is my college's 2-day vibe coding session
+
+This repo just containing some slop so don't waste your time
